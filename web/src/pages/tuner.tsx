@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router'
 import { ChannelLogo } from '@/components/channel-logo'
 import { ChannelsPanel } from '@/components/channels-panel'
+import { CheckPanel } from '@/components/check-panel'
 import { DevicePanel } from '@/components/device-panel'
 import { FirmwareSection } from '@/components/firmware'
 import { RemoveTunerDialog } from '@/components/remove-tuner-dialog'
@@ -272,6 +273,7 @@ export function TunerPage() {
         {current === 'device' && (
           <div className="space-y-3">
             <DevicePanel device={device} />
+            <CheckPanel device={device} />
             <a href={device.tuner.baseURL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
               Open the tuner's own page <ExternalLink aria-hidden className="size-3" />
             </a>

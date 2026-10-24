@@ -69,6 +69,9 @@ type Options struct {
 	LockShowsOwner string
 	// RefuseTune answers a tune request with an error, as a tuner that wouldn't tune to that channel.
 	RefuseTune bool
+	// Debug is the text the tuner gives for a debug value such as "/sys/debug" or "/tuner0/debug"; one not listed
+	// is unknown to it, as on older firmware.
+	Debug map[string]string
 	// Unknown is a value name the tuner answers with an error for, besides the ones it doesn't have.
 	Unknown map[string]bool
 }
@@ -128,6 +131,9 @@ func New(addr string, o Options) (*Server, error) {
 		"/sys/restart": "", "/sys/version": o.Version, "/sys/model": "hdhomerun_dvr_atsc3", "/sys/hwmodel": o.Model,
 		"/sys/features": "channelmap: us-bcast us-cable us-hrc us-irc kr-bcast kr-cable\nmodulation: atsc3 8vsb qam256 qam64\nauto-modulation: auto auto6t auto6c qam\n",
 	}}
+	for k, v := range o.Debug {
+		s.values[k] = v
+	}
 	s.tunedAt = map[int]time.Time{}
 	s.keys = map[string]string{}
 	for i := 0; i < o.Tuners; i++ {

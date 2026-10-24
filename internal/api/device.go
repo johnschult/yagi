@@ -2,6 +2,8 @@ package api
 
 import (
 	"net/http"
+
+	"github.com/johnschult/yagi/internal/tunercheck"
 )
 
 // deviceInfo is what the tuner says about itself (the Device panel). It is read when asked, not polled, and
@@ -28,4 +30,24 @@ func (a *API) deviceInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, info)
+}
+
+// checkTuner walks the tuner's side of a failed stream and says what it finds. It only reads, and it is a POST
+// because it does work every time it is asked, and the answer should never be remembered.
+func (a *API) checkTuner(w http.ResponseWriter, r *http.Request) {
+	d := a.device(r.PathValue("name"))
+	if d == nil {
+		writeErr(w, http.StatusNotFound, "no such tuner")
+		return
+	}
+	if a.Check == nil {
+		writeErr(w, http.StatusConflict, "checking the tuner is not available")
+		return
+	}
+	t := d.Mon.Snapshot()
+	target := tunercheck.Target{BaseURL: t.BaseURL, ID: t.ID}
+	for _, s := range t.Slots {
+		target.Slots = append(target.Slots, tunercheck.Slot{InUse: s.InUse, ViaProxy: s.ViaProxy})
+	}
+	writeJSON(w, http.StatusOK, a.Check.Run(r.Context(), target))
 }

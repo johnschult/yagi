@@ -32,6 +32,7 @@ import (
 	"github.com/johnschult/yagi/internal/restart"
 	"github.com/johnschult/yagi/internal/tailnet"
 	"github.com/johnschult/yagi/internal/tuner"
+	"github.com/johnschult/yagi/internal/tunercheck"
 	"github.com/johnschult/yagi/internal/tunerinfo"
 	"github.com/johnschult/yagi/internal/upgrade"
 	"github.com/johnschult/yagi/internal/version"
@@ -113,6 +114,8 @@ type API struct {
 	testing    sync.Map // device name -> a signal test is running on it
 	// History is who watched what, for the Activity page; nil means there is none.
 	History *history.Recorder
+	// Check walks a tuner's side of a failed stream, for the Check now button; nil means it can't.
+	Check *tunercheck.Checker
 	// Device reads what a tuner says about itself, for the Device panel; nil means it can't.
 	Device *tunerinfo.Reader
 	// Notify sends test messages to a notification channel; nil means there is no
@@ -164,6 +167,7 @@ func (a *API) Handler() http.Handler {
 		{"logs", map[string]http.HandlerFunc{"GET": a.getLogs, "DELETE": a.clearLogs}},
 		{"devices/{name}/restart", map[string]http.HandlerFunc{"POST": a.restartTuner, "DELETE": a.dismissRestart}},
 		{"devices/{name}/info", map[string]http.HandlerFunc{"GET": a.deviceInfo}},
+		{"devices/{name}/check", map[string]http.HandlerFunc{"POST": a.checkTuner}},
 		{"devices/{name}/firmware/upgrade", map[string]http.HandlerFunc{"POST": a.installFirmware, "DELETE": a.dismissUpgrade}},
 		{"plex/admins/{id}", map[string]http.HandlerFunc{"DELETE": a.removePlexAdmin}},
 		{"requests", map[string]http.HandlerFunc{"GET": a.listRequests}},

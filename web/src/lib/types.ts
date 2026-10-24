@@ -445,6 +445,21 @@ export interface DeviceInfo {
   problems?: string[]
 }
 
+/** One thing the Check now button looked at, and what it found, in words. */
+export interface CheckStep {
+  id: string
+  title: string
+  status: 'ok' | 'problem' | 'note' | 'skipped'
+  detail: string
+}
+
+/** What a check found: the steps in order, and what the tuner printed about itself. */
+export interface CheckReport {
+  at: string
+  steps: CheckStep[]
+  debug?: { name: string; lines: string[] }[]
+}
+
 /** One tuner on one channel for one viewer, from when it began to when it was last seen. */
 export interface HistorySession {
   device: string

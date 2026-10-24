@@ -1,4 +1,4 @@
-import type { AllowInput, AppState, ChannelInput, ChannelsDoc, ChannelState, DeviceInfo, DeviceInput, HistoryDoc, LogLevel, LogsDoc, SignalTestResult, TunerChannel, FirewallInfo, FoundTuner, NetworkAddress, AuthStatus, DevicePatch, DeviceState, PlexPollStatus, NotifyChannel, Settings, SettingsPatch, UpgradeRequest, Viewer, ViewerInput } from './types'
+import type { AllowInput, AppState, ChannelInput, ChannelsDoc, ChannelState, CheckReport, DeviceInfo, DeviceInput, HistoryDoc, LogLevel, LogsDoc, SignalTestResult, TunerChannel, FirewallInfo, FoundTuner, NetworkAddress, AuthStatus, DevicePatch, DeviceState, PlexPollStatus, NotifyChannel, Settings, SettingsPatch, UpgradeRequest, Viewer, ViewerInput } from './types'
 
 // The UI is served from / and the API lives beside it.
 export const API = `${import.meta.env.BASE_URL}api`
@@ -73,6 +73,7 @@ export const testChannel = (t: { id?: string; channel?: ChannelInput }) => reque
 export const installFirmware = (device: string, r: UpgradeRequest) =>
   request<{ release: string; from: string }>('POST', `/devices/${encodeURIComponent(device)}/firmware/upgrade`, r)
 /** Clear a finished install's result. */
+export const checkTuner = (device: string) => request<CheckReport>('POST', `/devices/${encodeURIComponent(device)}/check`)
 export const getDeviceInfo = (device: string, refresh = false) =>
   request<DeviceInfo>('GET', `/devices/${encodeURIComponent(device)}/info${refresh ? '?refresh=1' : ''}`)
 export const restartTuner = (device: string, interrupt: boolean) =>

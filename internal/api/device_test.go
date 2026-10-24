@@ -8,6 +8,7 @@ import (
 
 	"github.com/johnschult/yagi/internal/hdhr"
 	"github.com/johnschult/yagi/internal/hdhr/hdhrtest"
+	"github.com/johnschult/yagi/internal/tunercheck"
 	"github.com/johnschult/yagi/internal/tunerinfo"
 )
 
@@ -92,5 +93,36 @@ func TestDeviceInfoIsForAdminsOnly(t *testing.T) {
 	}
 	if len(ctrl.Frames()) != 0 {
 		t.Error("the tuner was asked on a viewer's behalf")
+	}
+}
+
+func TestCheckTunerReportsEachStep(t *testing.T) {
+	e, ctrl := infoEnv(t)
+	e.api.Check = &tunercheck.Checker{Dial: func(ctx context.Context, host string) (*hdhr.Conn, error) { return hdhr.Dial(ctx, ctrl.Addr()) }}
+	code, v := e.call(t, "POST", "/api/devices/antenna/check", "")
+	if code != 200 {
+		t.Fatalf("%d %v", code, v)
+	}
+	steps := v.(map[string]any)["steps"].([]any)
+	got := map[string]string{}
+	for _, s := range steps {
+		m := s.(map[string]any)
+		got[m["id"].(string)] = m["status"].(string)
+	}
+	if got["reach"] != "ok" || got["identity"] != "ok" || got["free"] != "ok" {
+		t.Errorf("steps = %v", got)
+	}
+	if got["channels"] != "problem" { // the test tuner serves no lineup
+		t.Errorf("channels = %q", got["channels"])
+	}
+}
+
+func TestCheckTunerRefusals(t *testing.T) {
+	e, _ := infoEnv(t)
+	if code, _ := e.call(t, "POST", "/api/devices/nope/check", ""); code != 404 {
+		t.Errorf("unknown tuner: %d", code)
+	}
+	if code, _ := e.call(t, "POST", "/api/devices/antenna/check", ""); code != 409 {
+		t.Errorf("unavailable: %d", code)
 	}
 }

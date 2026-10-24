@@ -119,6 +119,8 @@ Plex says "channel not available" when it asked for a stream and didn't get vide
 | **The tuner answered a media server's request for its channels with an empty list** | The tuner had no channels to give. That can happen during a rescan, or just after the tuner restarts, and it clears by itself when it has them again. | Wait a minute or two. If it stays, open the tuner's own page and check that it has scanned for channels. |
 | Nothing | Yagi saw no trouble. The problem is on the media server's side, or in reaching Yagi. | Check the media server's own log, and try `curl -i http://<address>:5004/lineup.json` from the media server. |
 
+To look at the tuner's side yourself, open the tuner's page, then its **Device** tab, and press **Check now**. It asks the tuner a few questions, one at a time, and says what it finds: whether the tuner answers, whether it is the tuner Yagi follows, whether it has channels, whether a tuner is free (and who is using the others), and whether the tuner's own error counters are above zero, which means a weak signal or a network that loses data. It only reads: it never tunes a channel or changes anything. "What the tuner prints about itself" shows the tuner's raw debug text, which SiliconDust support may ask for.
+
 Yagi only sees what happens between the media server and the tuner. It can't see Plex's own guide data or its settings.
 
 ## Plex shows the tuner twice, or with the wrong channels

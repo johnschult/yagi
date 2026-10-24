@@ -35,6 +35,7 @@ import (
 	"github.com/johnschult/yagi/internal/restart"
 	"github.com/johnschult/yagi/internal/tailnet"
 	"github.com/johnschult/yagi/internal/tuner"
+	"github.com/johnschult/yagi/internal/tunercheck"
 	"github.com/johnschult/yagi/internal/tunerinfo"
 	"github.com/johnschult/yagi/internal/ui"
 	"github.com/johnschult/yagi/internal/upgrade"
@@ -133,6 +134,7 @@ type Server struct {
 	notify       *notify.Notifier
 	upgrade      *upgrade.Manager
 	tunerinfo    *tunerinfo.Reader
+	tunercheck   *tunercheck.Checker
 	restart      *restart.Manager
 	history      *history.Recorder
 	plex         *plexauth.Auth
@@ -244,6 +246,7 @@ func New(ctx context.Context, cfg Config) (*Server, error) {
 		}
 	}
 	s.tunerinfo = &tunerinfo.Reader{Dial: dial}
+	s.tunercheck = &tunercheck.Checker{Dial: dial}
 	rcfg := restart.Config{Dial: dial, OnChange: s.hub.Notify, Log: cfg.Log}
 	if cfg.RestartConfig != nil {
 		cfg.RestartConfig(&rcfg)
@@ -293,7 +296,7 @@ func New(ctx context.Context, cfg Config) (*Server, error) {
 	admin := http.NewServeMux()
 	admin.Handle("/streams", policy.AdminOnly(policy.ActiveHandler()))
 	admin.Handle(api.Prefix, policy.AdminOnly((&api.API{
-		Tailnet: tailnetControl{s}, Logs: cfg.Logs, Fleet: s, Firmware: s.firmware, Guide: s.guide, Notify: s.notify, Upgrade: s.upgrade, Device: s.tunerinfo, Restart: s.restart, History: s.history, Lineup: &lineup.Client{}, Control: dial, Pol: policy, Store: s.store, Hub: s.hub, Log: cfg.Log,
+		Tailnet: tailnetControl{s}, Logs: cfg.Logs, Fleet: s, Firmware: s.firmware, Guide: s.guide, Notify: s.notify, Upgrade: s.upgrade, Device: s.tunerinfo, Check: s.tunercheck, Restart: s.restart, History: s.history, Lineup: &lineup.Client{}, Control: dial, Pol: policy, Store: s.store, Hub: s.hub, Log: cfg.Log,
 	}).Handler()))
 	// The page itself is just static files with no data in them. It has to load
 	// for someone who is not yet signed in, or there would be nowhere to sign in;
