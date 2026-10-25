@@ -527,7 +527,7 @@ func TestDemo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	go srv.Run(ctx)
+	goRun(t, srv, ctx, cancel)
 	// Two people who have just added Yagi in their media server and been refused: one over Yagi's own Tailscale, which
 	// says who they are, and one by a bare address. They are what the Viewers page shows to be allowed.
 	for _, ask := range []struct {
