@@ -422,6 +422,7 @@ func (s *Server) Policy() *access.Policy { return s.policy }
 func (s *Server) Run(ctx context.Context) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
+	defer s.events.Close()
 
 	s.fleetMu.Lock()
 	// Bind everything first, so a port that's already taken fails the whole

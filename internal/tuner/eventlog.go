@@ -31,8 +31,9 @@ type EventLog struct {
 	// OnError, if set, hears of an event that could not be written. The event is still kept in memory.
 	OnError func(error)
 
-	mu   sync.Mutex
-	size int64
+	mu     sync.Mutex
+	size   int64
+	closed bool
 }
 
 // Load reads the events in the file that are newer than KeepEvents, for each tuner by name, the newest maxEvents
@@ -90,11 +91,22 @@ func (l *EventLog) Load(now time.Time) map[string][]Event {
 	return by
 }
 
+// Close stops it writing: the Monitors go on a moment after Yagi is told to stop, and what they find then is not
+// news. A nil EventLog is fine to close.
+func (l *EventLog) Close() {
+	if l == nil {
+		return
+	}
+	l.mu.Lock()
+	l.closed = true
+	l.mu.Unlock()
+}
+
 // Append adds one event to the end of the file.
 func (l *EventLog) Append(device string, e Event) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	if l.size >= maxEventFile {
+	if l.closed || l.size >= maxEventFile {
 		return
 	}
 	b, err := json.Marshal(loggedEvent{Device: device, Time: e.Time, Kind: e.Kind, Text: e.Text})

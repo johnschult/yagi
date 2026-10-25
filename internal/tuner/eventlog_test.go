@@ -103,3 +103,17 @@ func TestAMonitorStartsWithItsPastAndReportsNewEvents(t *testing.T) {
 		t.Errorf("heard = %+v", heard)
 	}
 }
+
+func TestAClosedLogWritesNothingMore(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "yagi.events.jsonl")
+	l := &EventLog{Path: path}
+	l.Append("antenna", ev(0, "ok", "before"))
+	l.Close()
+	l.Append("antenna", ev(time.Second, "ok", "after"))
+	b, _ := os.ReadFile(path)
+	if !strings.Contains(string(b), "before") || strings.Contains(string(b), "after") {
+		t.Errorf("file:\n%s", b)
+	}
+	var none *EventLog
+	none.Close() // there is none when there is no settings file
+}

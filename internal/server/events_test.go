@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -50,4 +51,20 @@ func TestTunerEventsSurviveARestart(t *testing.T) {
 	if !strings.Contains(string(b), "Tuner online") || !strings.Contains(string(b), "before the restart") {
 		t.Errorf("the file does not have both:\n%s", b)
 	}
+}
+
+// goRun starts srv, and when the test ends stops it and waits for it to finish, so that nothing it was still
+// writing lands in the test's temporary directory while that is being removed.
+func goRun(t *testing.T, srv *Server, ctx context.Context, cancel context.CancelFunc) {
+	t.Helper()
+	done := make(chan struct{})
+	go func() { defer close(done); srv.Run(ctx) }()
+	t.Cleanup(func() {
+		cancel()
+		select {
+		case <-done:
+		case <-time.After(10 * time.Second):
+			t.Error("the server did not stop")
+		}
+	})
 }
