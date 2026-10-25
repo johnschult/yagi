@@ -2,7 +2,7 @@ module github.com/johnschult/yagi
 
 go 1.27.3
 
-require tailscale.com v1.104.1
+require tailscale.com v1.104.2
 
 require (
 	filippo.io/edwards25519 v1.2.0 // indirect
