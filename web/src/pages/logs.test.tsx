@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { lineText } from '@/lib/logs'
 import type { LogEntry, LogsDoc } from '@/lib/types'
 import { makeState } from '@/test/fixtures'
-import { renderWithApp, stubFetch } from '@/test/render'
+import { explain, renderWithApp, stubFetch } from '@/test/render'
 import { LogsPanel } from './logs'
 
 afterEach(() => vi.unstubAllGlobals())
@@ -98,39 +98,11 @@ describe('the Logs tab', () => {
   it('changes how much is logged, as a setting', async () => {
     const calls = show(doc(), makeState(), { 'PATCH /settings': () => ({ body: {} }) })
     await screen.findAllByTestId('log-line')
-    const level = screen.getByRole('combobox', { name: 'Record' })
+    const level = screen.getByRole('combobox', { name: 'Log level' })
     expect(level).toHaveValue('info')
     expect(within(level).getByRole('option', { name: 'Info (default)' })).toBeInTheDocument()
     await userEvent.setup().selectOptions(level, 'debug')
     await waitFor(() => expect(calls.find((c) => c.method === 'PATCH')?.body).toEqual({ logLevel: 'debug' }))
-  })
-
-  it('explains why ordinary requests are missing, and offers to record them', async () => {
-    const calls = show(doc(), makeState(), { 'PATCH /settings': () => ({ body: {} }) })
-    await screen.findAllByTestId('log-line')
-    const note = screen.getByTestId('requests-note')
-    expect(note).toHaveTextContent(/only recorded at the Debug level/)
-    await userEvent.setup().click(within(note).getByRole('button', { name: 'Record debug' }))
-    await waitFor(() => expect(calls.find((c) => c.method === 'PATCH')?.body).toEqual({ logLevel: 'debug' }))
-  })
-
-  it('says so when debug is on, and offers to go back to info', async () => {
-    const s = makeState()
-    s.settings.logLevel = 'debug'
-    const calls = show(doc(lines, { level: 'debug' }), s, { 'PATCH /settings': () => ({ body: {} }) })
-    await screen.findAllByTestId('log-line')
-    const note = screen.getByTestId('requests-note')
-    expect(note).toHaveTextContent(/Debug is on, so every request is recorded/)
-    await userEvent.setup().click(within(note).getByRole('button', { name: 'Back to Info' }))
-    await waitFor(() => expect(calls.find((c) => c.method === 'PATCH')?.body).toEqual({ logLevel: 'info' }))
-  })
-
-  it('has no button on the note in a read-only view', async () => {
-    const s = makeState()
-    s.editable = false
-    show(doc(), s)
-    await screen.findAllByTestId('log-line')
-    expect(within(screen.getByTestId('requests-note')).queryByRole('button')).not.toBeInTheDocument()
   })
 
   it('cannot change the level from a read-only view', async () => {
@@ -138,7 +110,7 @@ describe('the Logs tab', () => {
     s.editable = false
     show(doc(), s)
     await screen.findAllByTestId('log-line')
-    expect(screen.getByRole('combobox', { name: 'Record' })).toBeDisabled()
+    expect(screen.getByRole('combobox', { name: 'Log level' })).toBeDisabled()
   })
 
   it('polls while it is live and stops when that is switched off', async () => {
@@ -184,6 +156,8 @@ describe('diagnostics mode', () => {
     const calls = show(doc(), makeState(), { 'PUT /diagnostics': () => ({ body: { on: true, until: at(0) } }) })
     const card = screen.getByRole('region', { name: 'Diagnostics mode' })
     expect(within(card).getByText('Diagnostics mode is off')).toBeInTheDocument()
+    expect((await explain(card, 'Diagnostics mode')).getByText(/only happens now and then/)).toBeInTheDocument()
+    await userEvent.keyboard('{Escape}')
     await userEvent.selectOptions(within(card).getByLabelText('Keep it on for'), '240')
     await userEvent.click(within(card).getByRole('button', { name: 'Turn on' }))
     await waitFor(() => expect(calls.find((c) => c.method === 'PUT')?.body).toEqual({ on: true, minutes: 240 }))
@@ -203,6 +177,6 @@ describe('diagnostics mode', () => {
     const s = makeState()
     s.editable = false
     show(doc(), s)
-    expect(within(screen.getByRole('region', { name: 'Diagnostics mode' })).queryByRole('button')).not.toBeInTheDocument()
+    expect(within(screen.getByRole('region', { name: 'Diagnostics mode' })).queryByRole('button', { name: /^Turn o/ })).not.toBeInTheDocument()
   })
 })

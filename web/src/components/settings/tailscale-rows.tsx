@@ -35,7 +35,7 @@ export function TailscaleRows() {
     return (
       <Row
         title="Join your Tailscale network"
-        description={
+        note={
           <>
             This build of Yagi doesn&apos;t include Tailscale. The <code>-tailscale</code> image does: change the image tag in your compose file.{' '}
             <a href={DOCS} target="_blank" rel="noreferrer noopener" className="underline underline-offset-2">
@@ -65,13 +65,8 @@ export function TailscaleRows() {
             <SwitchRow
               id="setting-tailnetOnly"
               title="Only on the tailnet"
-              description={
-                !set.tailnetOnly
-                  ? "Refuse everything that comes in over your network's own address. Yagi then answers on the tailnet, and to this machine itself, and nothing else."
-                  : status.lanClosed
-                    ? 'On. Your network’s own address is refused: Yagi answers on the tailnet, and to this machine itself.'
-                    : 'On, but not in force: the LAN stays open while the tailnet is not connected' + ' (or Yagi was started with -allow-lan).'
-              }
+              description="Refuse everything that comes in over your network's own address. Yagi then answers on the tailnet, and to this machine itself, and nothing else."
+              note={!set.tailnetOnly ? undefined : status.lanClosed ? 'On. Your network’s own address is refused: Yagi answers on the tailnet, and to this machine itself.' : 'On, but not in force: the LAN stays open while the tailnet is not connected (or Yagi was started with -allow-lan).'}
               checked={set.tailnetOnly}
               disabled={!editable}
               onChange={async (next) => {
@@ -84,7 +79,8 @@ export function TailscaleRows() {
             <SwitchRow
               id="setting-tailscaleHttps"
               title="HTTPS for the admin page"
-              description={httpsDescription(set.https, status)}
+              description="Also serve this page over HTTPS at the device’s tailnet name, with a certificate from Tailscale. It needs HTTPS certificates turned on for your tailnet (Tailscale admin console → DNS), and the name then appears in a public certificate log. The tuner ports stay plain HTTP."
+              note={httpsNote(set.https, status)}
               checked={set.https}
               disabled={!editable}
               onChange={(next) => update.mutateAsync({ tailscaleHttps: next })}
@@ -112,7 +108,7 @@ export function TailscaleRows() {
 
 function TailscaleStatusRow({ status }: { status: TailscaleStatus }) {
   return (
-    <Row title="Status" description={describe(status)}>
+    <Row title="Status" note={describe(status)}>
       {status.state === 'needs-login' && status.loginUrl && (
         <a href={status.loginUrl} target="_blank" rel="noreferrer noopener" className={buttonVariants({ size: 'sm' })}>
           <ExternalLink data-icon="inline-start" />
@@ -134,10 +130,8 @@ function TailscaleStatusRow({ status }: { status: TailscaleStatus }) {
 }
 
 /** What the HTTPS row says: what it does and costs, then where it is or why it is not. */
-function httpsDescription(on: boolean, s: TailscaleStatus): ReactNode {
-  if (!on) {
-    return 'Also serve this page over HTTPS at the device’s tailnet name, with a certificate from Tailscale. It needs HTTPS certificates turned on for your tailnet (Tailscale admin console → DNS), and the name then appears in a public certificate log. The tuner ports stay plain HTTP.'
-  }
+function httpsNote(on: boolean, s: TailscaleStatus): ReactNode {
+  if (!on) return undefined
   if (s.https) {
     return (
       <>

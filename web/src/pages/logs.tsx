@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Download, Info, Loader2, Stethoscope, Trash2, X } from 'lucide-react'
+import { Download, Loader2, Stethoscope, Trash2, X } from 'lucide-react'
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
+import { InfoTip } from '@/components/info-tip'
 import { ReportCard } from '@/components/report-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -86,12 +87,15 @@ function DiagnosticsCard({ editable }: { editable: boolean }) {
     <section aria-label="Diagnostics mode" className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-xl border border-border bg-card/70 px-4 py-3.5">
       <Stethoscope aria-hidden className={cn('size-5 shrink-0', on ? 'text-sky-600 dark:text-sky-400' : 'text-muted-foreground')} />
       <div className="min-w-0 flex-1 basis-72">
-        <h2 className="text-sm font-semibold">Diagnostics mode {on ? 'is on' : 'is off'}</h2>
-        <p className="text-xs text-muted-foreground">
-          {on && diag.until
-            ? `Every request is being written down, and the tuner is checked the moment it fails one. It turns itself off at ${clock(diag.until)}. Turn it on, wait for the trouble, then look here.`
-            : 'For trouble that only happens now and then. While it is on, Yagi writes down how every request went (how long, what the tuner answered, how the stream ended) and checks the tuner the moment it fails one. It turns itself off.'}
-        </p>
+        <div className="flex items-center gap-1.5">
+          <h2 className="text-sm font-semibold">Diagnostics mode {on ? 'is on' : 'is off'}</h2>
+          <InfoTip about="Diagnostics mode">
+            For trouble that only happens now and then. While it is on, Yagi writes down how every request went (how long, what the tuner answered, how the stream ended) and checks the tuner the moment it fails one. It turns itself off.
+          </InfoTip>
+        </div>
+        {on && diag.until && (
+          <p className="text-xs text-muted-foreground">It turns itself off at {clock(diag.until)}. Turn it on, wait for the trouble, then look here.</p>
+        )}
       </div>
       {editable && (
         <div className="flex items-center gap-2">
@@ -185,13 +189,21 @@ export function LogsPanel() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
-        <p className="max-w-xl text-sm text-muted-foreground">
-          What Yagi has been doing. The newest lines are kept in memory, not in a file, and start over when it restarts. <strong className="font-medium text-foreground">Show</strong> picks which of the kept lines are listed;{' '}
-          <strong className="font-medium text-foreground">Record</strong> sets how much it writes down from now on.
+        <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+          What Yagi has been doing.
+          <InfoTip about="the log">
+            <p>The newest lines are kept in memory, not in a file, and start over when it restarts.</p>
+            <p>
+              <strong className="font-medium text-foreground">Show</strong> picks which of the kept lines are listed; <strong className="font-medium text-foreground">Log level</strong> sets how much it writes down from now on.
+            </p>
+            <p>
+              The requests a media server makes over and over (GET discover.json, lineup.json and the like) are only recorded at the Debug level, because there are so many; that fills the log quickly. Streams, refusals and warnings are always shown.
+            </p>
+          </InfoTip>
         </p>
         <div className="flex items-center gap-2 text-sm" title="How much Yagi writes down from now on. Lines already kept don't change.">
           <label htmlFor="log-level" className="text-muted-foreground">
-            Record
+            Log level
           </label>
           <Select
             id="log-level"
@@ -212,20 +224,6 @@ export function LogsPanel() {
       <DiagnosticsCard editable={editable} />
 
       <ReportCard />
-
-      <div role="note" data-testid="requests-note" className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm">
-        <Info aria-hidden className="size-4 shrink-0 text-muted-foreground" />
-        <p className="min-w-0 flex-1 text-muted-foreground">
-          {logLevel === 'debug'
-            ? 'Debug is on, so every request is recorded, including the discover.json and lineup.json a media server asks for over and over. That fills the log quickly.'
-            : 'The requests a media server makes over and over (GET discover.json, lineup.json and the like) are only recorded at the Debug level, because there are so many. Streams, refusals and warnings are always shown.'}
-        </p>
-        {editable && (
-          <Button type="button" variant="outline" size="sm" disabled={update.isPending} onClick={() => update.mutate({ logLevel: logLevel === 'debug' ? 'info' : 'debug' })}>
-            {logLevel === 'debug' ? 'Back to Info' : 'Record debug'}
-          </Button>
-        )}
-      </div>
 
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
         <div className="flex items-center gap-2 text-sm">
