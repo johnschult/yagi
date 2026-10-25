@@ -139,6 +139,8 @@ type Server struct {
 	diag         *diag.Mode
 	restart      *restart.Manager
 	history      *history.Recorder
+	events       *tuner.EventLog // nil when there is no settings file
+	pastEvents   map[string][]tuner.Event
 	plex         *plexauth.Auth
 	claim        *claim.Claimer
 	tailnet      *tailnet.Manager
@@ -266,6 +268,10 @@ func New(ctx context.Context, cfg Config) (*Server, error) {
 	if p := historyFile(cfg.ConfigPath); p != "" {
 		hstore = &history.Store{Path: p}
 	}
+	if p := eventsFile(cfg.ConfigPath); p != "" {
+		s.events = &tuner.EventLog{Path: p, OnError: func(err error) { cfg.Log.Warn("couldn't save a tuner event", "err", err) }}
+		s.pastEvents = s.events.Load(time.Now())
+	}
 	s.history = history.New(hstore, time.Now())
 	s.history.OnError = func(err error) { cfg.Log.Warn("couldn't save the activity history", "err", err) }
 
@@ -345,6 +351,8 @@ func (s *Server) build(ctx context.Context, d access.Device) (*device, error) {
 		OnTransition: func(online bool) { s.notify.TunerState(d.Name, s.title(d.Name), online) },
 		OnMoved:      func(_, to string) { s.saveTunerAddress(d.Name, to) },
 		Streams:      func() []string { return s.policy.OpenChannels(d.Name) },
+		Past:         s.pastEvents[d.Name],
+		OnEvent:      s.keepEvent(d.Name),
 		Logger:       log,
 	})
 	s.policy.AddDevice(d.Name, mon, mon)
