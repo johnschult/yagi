@@ -145,6 +145,12 @@ type Config struct {
 	// OnMoved, if set, is called once the tuner has been found at a new address and has answered there, with
 	// the address it was at and the one it is at now, and the lock released. It is how the new address gets saved.
 	OnMoved func(from, to string)
+	// Past is what happened to this tuner before Yagi started, oldest first, from the file they are kept in. The
+	// page shows them above the new ones.
+	Past []Event
+	// OnEvent, if set, hears of each new event, to keep it. It is called with the Monitor's lock held, so it must
+	// be quick and must not call back into it.
+	OnEvent func(Event)
 	Logger  *slog.Logger
 }
 
@@ -254,6 +260,12 @@ func NewMonitor(cfg Config) *Monitor {
 	}
 	m := &Monitor{cfg: cfg, client: &http.Client{Timeout: 3 * time.Second}, log: cfg.Logger, kick: make(chan struct{}, 1)}
 	m.st = State{Name: cfg.Name, ID: strings.ToUpper(cfg.ID), BaseURL: discovery.NormalizeBase(cfg.BaseURL), Since: time.Now()}
+	if n := len(cfg.Past); n > 0 {
+		if n > maxEvents {
+			cfg.Past = cfg.Past[n-maxEvents:]
+		}
+		m.st.Events = append([]Event(nil), cfg.Past...)
+	}
 	if cfg.Find == nil {
 		m.cfg.Find = m.defaultFind
 	}
@@ -672,7 +684,11 @@ func (m *Monitor) Note(kind, text string) {
 
 // addEvent records an event; m.mu must be held.
 func (m *Monitor) addEvent(kind, text string) {
-	m.st.Events = append(m.st.Events, Event{Time: time.Now(), Kind: kind, Text: text})
+	e := Event{Time: time.Now(), Kind: kind, Text: text}
+	m.st.Events = append(m.st.Events, e)
+	if m.cfg.OnEvent != nil {
+		m.cfg.OnEvent(e)
+	}
 	if n := len(m.st.Events); n > maxEvents {
 		m.st.Events = m.st.Events[n-maxEvents:]
 	}
