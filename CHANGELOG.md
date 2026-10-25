@@ -21,6 +21,10 @@ Each release's notes on GitHub are its section of this file.
 
 - **Report a problem, on the Logs tab.** One button that makes a report to send to whoever is helping: your settings, each tuner's state, the trouble media servers ran into and the tuner's recent events, a fresh Check now of every tuner with its own counters, and the newest 300 log lines. You read it, then copy it or save it as a file; nothing is sent by Yagi. It has no passwords or keys, but it does show the addresses of your tuner and of whoever watched.
 
+### Changed
+
+- **Each setting's explanation is behind a small (i).** The text under a setting's name, such as what a switch does or what a field takes, is now in a popover you open with the (i) beside the name (a sheet from the bottom on a phone), so the Settings page and the Logs tab are shorter. What is true right now (a status, a warning, a result) and every error stay on the row. The control on the Logs tab that said **Record** now says **Log level**, and the note about debug requests is explained in the (i) at the top of the tab instead of in a box of its own.
+
 ### Fixed
 
 - **A tall dialog scrolls on a phone.** On a phone, dialogs open as a sheet from the bottom, and one taller than the screen, such as adding a viewer or its connection steps, could not be scrolled by touch, so the buttons at the bottom were out of reach. The body of the sheet scrolls now. Swiping the handle, the Close button, the backdrop and Escape still close it.

@@ -26,7 +26,7 @@ function ChannelRow({ channel, editable, onEdit, onRemove }: { channel: NotifyCh
   const { channelTest } = useEdits()
   const Icon = ICONS[channel.type]
   return (
-    <Row title={channel.name} icon={<Icon aria-hidden className="size-5 text-muted-foreground" />} description={channelSummary(channel)}>
+    <Row title={channel.name} icon={<Icon aria-hidden className="size-5 text-muted-foreground" />} note={channelSummary(channel)}>
       <Button size="sm" variant="outline" disabled={!editable || channelTest.isPending} onClick={() => channelTest.mutate({ name: channel.name, request: { id: channel.id } })} aria-label={`Send a test to ${channel.name}`}>
         {channelTest.isPending ? <Loader2 data-icon="inline-start" className="animate-spin" /> : <Send data-icon="inline-start" />}
         {channelTest.isPending ? 'Sending…' : 'Test'}
@@ -60,7 +60,8 @@ export function NotificationRows() {
             key={e.id}
             id={`setting-notify-${e.id}`}
             title={e.title}
-            description={blocked ? `${e.description} Turn on “Check for new tuner firmware” under Settings → Privacy first.` : e.description}
+            description={e.description}
+            note={blocked ? 'Turn on “Check for new tuner firmware” under Settings → Privacy first.' : undefined}
             checked={events[e.id] && !blocked}
             disabled={!editable || blocked}
             onChange={(next) => update.mutateAsync({ notifyEvents: { [e.id]: next } })}
@@ -72,7 +73,7 @@ export function NotificationRows() {
       ))}
       <Row
         title={channels.length === 0 ? 'Where to send them' : 'Add another'}
-        description={channels.length === 0 ? 'Nothing is sent, and nothing is contacted, until you add one. Every channel gets every message you switch on.' : undefined}
+        note={channels.length === 0 ? 'Nothing is sent, and nothing is contacted, until you add one. Every channel gets every message you switch on.' : undefined}
       >
         <Button size="sm" variant="outline" disabled={!editable || channels.length >= 8} onClick={() => setDialog({})}>
           <Plus data-icon="inline-start" /> Add channel

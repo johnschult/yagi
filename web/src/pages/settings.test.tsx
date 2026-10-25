@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { fakeWindow, stubOpen } from '@/test/fake-window'
 import { makeDevice, makeState, makeTwoDeviceState, noNotifications } from '@/test/fixtures'
 import { Route, Routes } from 'react-router'
-import { renderSettings, renderWithApp, stubFetch } from '@/test/render'
+import { explain, renderSettings, renderWithApp, stubFetch } from '@/test/render'
 import { SettingsPage } from './settings'
 
 afterEach(() => vi.unstubAllGlobals())
@@ -206,10 +206,11 @@ describe('SettingsPage', () => {
       await waitFor(() => expect(calls.find((c) => c.method === 'PATCH')?.body).toEqual({ firmwareCheck: true }))
     })
 
-    it('says what it sends: nothing about you', () => {
+    it('says what it sends: nothing about you', async () => {
       renderSettings(state(), 'privacy')
-      expect(within(section('Privacy and updates')).getByText(/Nothing about you or your tuners is sent/)).toBeInTheDocument()
-      expect(within(section('Privacy and updates')).getByText(/installs one only when you press Install on a tuner's Firmware tab/)).toBeInTheDocument()
+      const tip = await explain(section('Privacy and updates'), 'Check for new tuner firmware')
+      expect(tip.getByText(/Nothing about you or your tuners is sent/)).toBeInTheDocument()
+      expect(tip.getByText(/installs one only when you press Install on a tuner's Firmware tab/)).toBeInTheDocument()
     })
 
     it('shows a failure on the row', async () => {
@@ -279,7 +280,7 @@ describe('guide setting', () => {
     renderSettings(state(), 'privacy')
     const sw = within(section('Privacy and updates')).getByRole('switch', { name: "Show what's on" })
     expect(sw).toBeChecked()
-    expect(within(section('Privacy and updates')).getByText(/sends SiliconDust your tuner's guide key/)).toBeInTheDocument()
+    expect((await explain(section('Privacy and updates'), "Show what's on")).getByText(/sends SiliconDust your tuner's guide key/)).toBeInTheDocument()
     await userEvent.setup().click(sw)
     await waitFor(() => expect(calls.find((c) => c.method === 'PATCH')?.body).toEqual({ guide: false }))
   })
@@ -301,7 +302,7 @@ describe('activity history setting', () => {
     renderSettings(state(), 'privacy')
     const sw = privacy().getByRole('switch', { name: 'Keep activity history' })
     expect(sw).toBeChecked()
-    expect(privacy().getByText(/A viewer's address is not kept/)).toBeInTheDocument()
+    expect((await explain(privacy(), 'Keep activity history')).getByText(/A viewer's address is not kept/)).toBeInTheDocument()
     await userEvent.setup().click(sw)
     await waitFor(() => expect(calls.find((c) => c.method === 'PATCH')?.body).toEqual({ history: false }))
   })
@@ -318,7 +319,7 @@ describe('activity history setting', () => {
     vi.stubGlobal('fetch', fn)
     renderSettings(state(), 'privacy')
     const user = userEvent.setup()
-    await user.click(within(screen.getByText('Clear activity history').closest('div')!.parentElement!.parentElement!).getByRole('button', { name: /Clear/ }))
+    await user.click(screen.getByRole('button', { name: 'Clear' }))
     const d = await screen.findByRole('alertdialog')
     expect(within(d).getByText('Clear the activity history?')).toBeInTheDocument()
     expect(calls.filter((c) => c.method === 'DELETE')).toHaveLength(0)
@@ -333,7 +334,7 @@ describe('activity history setting', () => {
     vi.stubGlobal('fetch', fn)
     renderSettings(state(), 'privacy')
     const user = userEvent.setup()
-    await user.click(within(screen.getByText('Clear activity history').closest('div')!.parentElement!.parentElement!).getByRole('button', { name: /Clear/ }))
+    await user.click(screen.getByRole('button', { name: 'Clear' }))
     await user.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: /Keep it/ }))
     expect(calls.filter((c) => c.method === 'DELETE')).toHaveLength(0)
   })
@@ -504,8 +505,9 @@ describe('Tailscale settings', () => {
     const { fn, calls } = patched()
     vi.stubGlobal('fetch', fn)
     renderSettings(withTailscale({ state: 'running', dnsName: 'yagi.tail1234.ts.net' }), 'access')
-    expect(within(access()).getByText(/public certificate log/)).toBeInTheDocument()
-    expect(within(access()).getByText(/HTTPS certificates turned on/)).toBeInTheDocument()
+    const tip = await explain(access(), 'HTTPS for the admin page')
+    expect(tip.getByText(/public certificate log/)).toBeInTheDocument()
+    expect(tip.getByText(/HTTPS certificates turned on/)).toBeInTheDocument()
     await userEvent.setup().click(within(access()).getByRole('switch', { name: 'HTTPS for the admin page' }))
     await waitFor(() => expect(calls.find((c) => c.method === 'PATCH')?.body).toEqual({ tailscaleHttps: true }))
   })

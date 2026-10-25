@@ -98,7 +98,7 @@ export function DevicePanel({ device }: { device: DeviceState }) {
       {rs && (
         <Row
           title={restarting ? 'Restarting' : rs.phase === 'done' ? 'Restarted' : 'The restart failed'}
-          description={
+          note={
             <span role={restarting ? 'status' : undefined} className={rs.phase === 'failed' ? 'text-red-700 dark:text-red-300' : undefined}>
               {restarting ? 'The tuner is restarting. It will be back on its own.' : rs.phase === 'done' ? 'The tuner is back.' : (rs.error ?? 'The restart did not finish.')}
             </span>

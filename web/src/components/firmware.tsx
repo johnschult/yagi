@@ -76,7 +76,7 @@ export function FirmwareSection({ device }: { device: DeviceState }) {
     <Section bare icon={Cpu} title="Firmware" description="The firmware the tuner is running, and installing a newer one.">
       <Row
         title="Version"
-        description={`${tuner.firmware.name ?? tuner.model ?? 'Tuner'} · ${s.current || tuner.firmware.version || 'unknown'}`}
+        note={`${tuner.firmware.name ?? tuner.model ?? 'Tuner'} · ${s.current || tuner.firmware.version || 'unknown'}`}
       >
         <span className="text-sm font-medium">{firmwareDate(s.current)}</span>
         <StatusBadge s={s} />
@@ -90,7 +90,7 @@ export function FirmwareSection({ device }: { device: DeviceState }) {
       {up && (
         <Row
           title={running ? 'Updating' : up.phase === 'done' ? 'Updated' : 'The update failed'}
-          description={
+          note={
             <span role={running ? 'status' : undefined} className={up.phase === 'failed' ? 'text-red-700 dark:text-red-300' : undefined}>
               {upgradeText(up)}
             </span>
@@ -108,7 +108,7 @@ export function FirmwareSection({ device }: { device: DeviceState }) {
 
       <Row
         title="SiliconDust's changelog"
-        description={
+        note={
           <>
             {isNever(s.checkedAt) ? 'Not read yet.' : `Last read ${timeAgo(s.checkedAt)}.`}
             {s.deviceReported && <> The tuner itself reports {firmwareDate(s.deviceReported)} as available.</>}

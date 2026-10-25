@@ -7,6 +7,7 @@ export function SwitchRow({
   id,
   title,
   description,
+  note,
   icon,
   checked,
   onChange,
@@ -15,6 +16,7 @@ export function SwitchRow({
   id: string
   title: string
   description?: ReactNode
+  note?: ReactNode
   icon?: ReactNode
   checked: boolean
   onChange: (next: boolean) => Promise<unknown>
@@ -36,7 +38,7 @@ export function SwitchRow({
   }
 
   return (
-    <Row title={title} description={description} icon={icon} htmlFor={id} error={error} inline>
+    <Row title={title} description={description} note={note} icon={icon} htmlFor={id} error={error} inline>
       <Switch id={id} checked={checked} onCheckedChange={flip} disabled={disabled || busy} />
     </Row>
   )

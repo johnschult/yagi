@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render } from '@testing-library/react'
+import { render, screen, within, type BoundFunctions, type queries } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import type { ReactElement } from 'react'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { Toaster } from '@/components/ui/sonner'
@@ -70,4 +71,11 @@ export function renderSettings(state: AppState, tab: 'access' | 'notifications' 
     state,
     { ...opts, route: tab === 'access' ? '/settings' : `/settings/${tab}` },
   )
+}
+
+/** Open the (i) beside something (the "About <name>" button, found in `scope`) and return what it says. */
+export async function explain(scope: HTMLElement | BoundFunctions<typeof queries>, name: string | RegExp) {
+  const button = 'getByRole' in scope ? scope.getByRole('button', { name: typeof name === 'string' ? `About ${name}` : name }) : within(scope).getByRole('button', { name: typeof name === 'string' ? `About ${name}` : name })
+  await userEvent.setup().click(button)
+  return within(await screen.findByRole('dialog'))
 }

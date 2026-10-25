@@ -9,6 +9,7 @@ interface Props {
   id: string
   title: string
   description?: string
+  note?: string
   /** What is saved now. The row keeps its own text until saved or reset. */
   initial: string
   /** Returns a message if the text can't be saved. */
@@ -26,7 +27,7 @@ type Kind = { kind: 'text'; maxLength?: number } | { kind: 'number'; min?: numbe
  * what is saved; Enter saves (not in a multi-line box, where it makes a line).
  */
 export function EditRow(props: Props & Kind) {
-  const { id, title, description, initial, validate, onSave, disabled, placeholder } = props
+  const { id, title, description, note, initial, validate, onSave, disabled, placeholder } = props
   const [text, setText] = useState(initial)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -51,7 +52,7 @@ export function EditRow(props: Props & Kind) {
 
   return (
     <form onSubmit={save} noValidate>
-      <Row title={title} description={description} htmlFor={id} error={error}>
+      <Row title={title} description={description} note={note} htmlFor={id} error={error}>
         {props.kind === 'lines' ? (
           <Textarea {...common} rows={3} className="w-full font-mono sm:w-72" />
         ) : props.kind === 'number' ? (

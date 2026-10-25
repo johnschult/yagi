@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query'
 import { Check, Copy, Download, FileText, Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { InfoTip } from '@/components/info-tip'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { makeReport } from '@/lib/api'
@@ -43,10 +44,12 @@ export function ReportCard() {
     <section aria-label="Report a problem" className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-xl border border-border bg-card/70 px-4 py-3.5">
       <FileText aria-hidden className="size-5 shrink-0 text-muted-foreground" />
       <div className="min-w-0 flex-1 basis-72">
-        <h2 className="text-sm font-semibold">Report a problem</h2>
-        <p className="text-xs text-muted-foreground">
-          Puts everything in one place for whoever is helping: your settings, each tuner's state and recent events, a fresh check of every tuner, and the newest log lines. Nothing is sent anywhere. You read it, then copy or save it.
-        </p>
+        <div className="flex items-center gap-1.5">
+          <h2 className="text-sm font-semibold">Report a problem</h2>
+          <InfoTip about="Report a problem">
+            Puts everything in one place for whoever is helping: your settings, each tuner's state and recent events, a fresh check of every tuner, and the newest log lines. Nothing is sent anywhere. You read it, then copy or save it.
+          </InfoTip>
+        </div>
       </div>
       <Button size="sm" disabled={report.isPending} onClick={() => report.mutate()}>
         {report.isPending ? <Loader2 data-icon="inline-start" className="animate-spin" /> : <FileText data-icon="inline-start" />}

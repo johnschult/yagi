@@ -368,7 +368,7 @@ describe('axe: dialogs', () => {
   })
 
   it('Remove tuner', async () => {
-    await open('/tuners/antenna/settings', makeState(), /Remove/, 'alertdialog')
+    await open('/tuners/antenna/settings', makeState(), /^Remove/, 'alertdialog')
     expect(await check()).toHaveNoViolations()
   })
 })
