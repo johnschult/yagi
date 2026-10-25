@@ -103,16 +103,33 @@ type Server struct {
 	tunes    []string
 }
 
+// listen opens the TCP and UDP sockets on one port. With a port of 0 the system picks the TCP port, and the same number
+// may already be taken for UDP by another test running at the same time, so that is tried again with another.
+func listen(addr string) (net.Listener, net.PacketConn, error) {
+	tries := 1
+	if _, port, err := net.SplitHostPort(addr); err == nil && port == "0" {
+		tries = 50
+	}
+	var err error
+	for range tries {
+		var tcp net.Listener
+		if tcp, err = net.Listen("tcp", addr); err != nil {
+			return nil, nil, err
+		}
+		var udp net.PacketConn
+		if udp, err = net.ListenPacket("udp", tcp.Addr().String()); err == nil {
+			return tcp, udp, nil
+		}
+		tcp.Close()
+	}
+	return nil, nil, err
+}
+
 // New starts a fake tuner on addr ("127.0.0.1:0" for any free port; the official tool needs 65001). It
 // listens for TCP control and for the UDP discover on the same port.
 func New(addr string, o Options) (*Server, error) {
-	tcp, err := net.Listen("tcp", addr)
+	tcp, udp, err := listen(addr)
 	if err != nil {
-		return nil, err
-	}
-	udp, err := net.ListenPacket("udp", tcp.Addr().String())
-	if err != nil {
-		tcp.Close()
 		return nil, err
 	}
 	if o.DeviceID == "" {
