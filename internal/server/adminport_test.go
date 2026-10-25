@@ -37,7 +37,7 @@ func startSplitFleet(t *testing.T, devices []access.Device, tuners ...*fakeTuner
 		t.Fatal(err)
 	}
 	f.srv = srv
-	go srv.Run(ctx)
+	goRun(t, srv, ctx, cancel)
 	f.base = "http://127.0.0.1:" + port
 	f.waitUp(t)
 	return f

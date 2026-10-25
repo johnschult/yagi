@@ -74,7 +74,7 @@ func startFleetWith(t *testing.T, s access.Settings, devices []access.Device, wi
 		t.Fatal(err)
 	}
 	f.srv = srv
-	go srv.Run(ctx)
+	goRun(t, srv, ctx, cancel)
 	f.base = "http://127.0.0.1:" + port
 	f.waitUp(t)
 	return f
@@ -292,7 +292,7 @@ func TestTunersFromFlagsCannotBeAddedToOrRemoved(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	go srv.Run(ctx)
+	goRun(t, srv, ctx, cancel)
 	f.base = "http://127.0.0.1:" + adminPort
 	f.waitUp(t)
 	if code, _ := call(t, "DELETE", f.base+"/api/devices/antenna", nil); code != http.StatusConflict {

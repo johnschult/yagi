@@ -21,6 +21,8 @@ Each release's notes on GitHub are its section of this file.
 
 - **Report a problem, on the Logs tab.** One button that makes a report to send to whoever is helping: your settings, each tuner's state, the trouble media servers ran into and the tuner's recent events, a fresh Check now of every tuner with its own counters, and the newest 300 log lines. You read it, then copy it or save it as a file; nothing is sent by Yagi. It has no passwords or keys, but it does show the addresses of your tuner and of whoever watched.
 
+- **A tuner's events are kept across restarts.** Offline, back, moved to a new address, a stream turned away and no channels used to be shown only until Yagi restarted, which is exactly when an update has just happened. They are now kept in `<settings file>.events.jsonl` beside the settings file, for 30 days (the newest 50 for each tuner), and are shown on the tuner's page and in a report as before. The file stops growing at about 1 MB between restarts. Without a settings file they are kept in memory only.
+
 ### Changed
 
 - **Each setting's explanation is behind a small (i).** The text under a setting's name, such as what a switch does or what a field takes, is now in a popover you open with the (i) beside the name (a sheet from the bottom on a phone), so the Settings page and the Logs tab are shorter. What is true right now (a status, a warning, a result) and every error stay on the row. The control on the Logs tab that said **Record** now says **Log level**, and the note about debug requests is explained in the (i) at the top of the tab instead of in a box of its own.
