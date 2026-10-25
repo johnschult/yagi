@@ -16,6 +16,10 @@ updates:
     groups:
       web-minor-and-patch:
         update-types: [minor, patch]
+    ignore:
+      # Odd-numbered Node releases never become long-term support; stay on the even ones.
+      - dependency-name: "@types/node"
+        versions: ["25.x", "27.x", "29.x"]
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -27,3 +31,6 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      - dependency-name: node
+        versions: ["25.x", "27.x", "29.x"]
