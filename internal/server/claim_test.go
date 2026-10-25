@@ -44,7 +44,7 @@ func startFirstRun(t *testing.T, s access.Settings, withFile bool) (srv *Server,
 	if err != nil {
 		t.Fatal(err)
 	}
-	go srv.Run(ctx)
+	goRun(t, srv, ctx, cancel)
 	// Run logs the setup links before it starts serving.
 	deadline := time.Now().Add(3 * time.Second)
 	for !strings.Contains(logs.String(), "listening") && time.Now().Before(deadline) {

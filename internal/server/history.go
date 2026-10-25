@@ -21,6 +21,15 @@ func historyFile(configPath string) string {
 	return strings.TrimSuffix(configPath, filepath.Ext(configPath)) + ".history.jsonl"
 }
 
+// eventsFile is where what happened to the tuners is kept: beside the settings file, and empty (so kept in memory
+// only) when there isn't one.
+func eventsFile(configPath string) string {
+	if configPath == "" {
+		return ""
+	}
+	return strings.TrimSuffix(configPath, filepath.Ext(configPath)) + ".events.jsonl"
+}
+
 // observations says what is in use on every tuner right now, for the Activity page.
 func (s *Server) observations(now time.Time) []history.Observation {
 	streams := s.policy.Active()
@@ -111,4 +120,12 @@ func logLevel(name string) slog.Level {
 		return slog.LevelError
 	}
 	return slog.LevelInfo
+}
+
+// keepEvent returns what a tuner's monitor calls for each new event, or nil when there is nowhere to keep it.
+func (s *Server) keepEvent(device string) func(tuner.Event) {
+	if s.events == nil {
+		return nil
+	}
+	return func(e tuner.Event) { s.events.Append(device, e) }
 }
