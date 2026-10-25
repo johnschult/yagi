@@ -45,6 +45,8 @@ describe.each([true, false])('dialogs when phone is %s', (phone) => {
       expect(d.className).toMatch(/\bfixed\b/) // not overridden by a relative, which would drop it into the page
       expect(d.className).not.toMatch(/\brelative\b/)
       expect(d.firstElementChild).toHaveClass('absolute') // the drag handle is out of the flow, so it takes no row of the body's grid
+      // The body is what scrolls, and Vaul is told to leave a swipe in it alone: when the sheet itself scrolled, a tall dialog couldn't be scrolled by touch.
+      expect(d.querySelector('[data-vaul-no-drag]')).toContainElement(screen.getByText('Edit it'))
     }
     await userEvent.setup().keyboard('{Escape}')
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
