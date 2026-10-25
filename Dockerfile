@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # 1. Build the web UI, which the Go binary embeds.
-FROM --platform=$BUILDPLATFORM node:22-alpine AS web
+FROM --platform=$BUILDPLATFORM node:25-alpine AS web
 WORKDIR /src/web
 COPY web/package.json web/package-lock.json ./
 RUN npm ci
