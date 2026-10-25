@@ -171,6 +171,7 @@ func (a *API) Handler() http.Handler {
 		{"devices/{name}/restart", map[string]http.HandlerFunc{"POST": a.restartTuner, "DELETE": a.dismissRestart}},
 		{"devices/{name}/info", map[string]http.HandlerFunc{"GET": a.deviceInfo}},
 		{"diagnostics", map[string]http.HandlerFunc{"GET": a.getDiagnostics, "PUT": a.putDiagnostics}},
+		{"report", map[string]http.HandlerFunc{"POST": a.makeReport}},
 		{"devices/{name}/check", map[string]http.HandlerFunc{"POST": a.checkTuner}},
 		{"devices/{name}/firmware/upgrade", map[string]http.HandlerFunc{"POST": a.installFirmware, "DELETE": a.dismissUpgrade}},
 		{"plex/admins/{id}", map[string]http.HandlerFunc{"DELETE": a.removePlexAdmin}},

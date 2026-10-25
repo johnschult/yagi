@@ -19,6 +19,8 @@ Each release's notes on GitHub are its section of this file.
 
 - **Diagnostics mode, on the Logs tab.** For trouble that only happens now and then. It is off whenever Yagi starts and turns itself off after 15 minutes, an hour, four hours or a day, as you pick. While it is on, the log gets a line for each request with what was answered, how long it took and how many bytes went out, and for a stream how long it waited for the first byte and whether the viewer or the tuner ended it. When the tuner turns a stream away, has no channels, doesn't give its channel list, or opens a stream that ends within a few seconds, Yagi runs Check now at that moment and writes down the result and the tuner's own counters. Nothing is written to disk: the lines are in the log's memory like the rest.
 
+- **Report a problem, on the Logs tab.** One button that makes a report to send to whoever is helping: your settings, each tuner's state, the trouble media servers ran into and the tuner's recent events, a fresh Check now of every tuner with its own counters, and the newest 300 log lines. You read it, then copy it or save it as a file; nothing is sent by Yagi. It has no passwords or keys, but it does show the addresses of your tuner and of whoever watched.
+
 ### Fixed
 
 - **A tall dialog scrolls on a phone.** On a phone, dialogs open as a sheet from the bottom, and one taller than the screen, such as adding a viewer or its connection steps, could not be scrolled by touch, so the buttons at the bottom were out of reach. The body of the sheet scrolls now. Swiping the handle, the Close button, the backdrop and Escape still close it.
