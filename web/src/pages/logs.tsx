@@ -3,6 +3,7 @@ import { Download, Info, Loader2, Stethoscope, Trash2, X } from 'lucide-react'
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
+import { ReportCard } from '@/components/report-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
@@ -209,6 +210,8 @@ export function LogsPanel() {
       </div>
 
       <DiagnosticsCard editable={editable} />
+
+      <ReportCard />
 
       <div role="note" data-testid="requests-note" className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm">
         <Info aria-hidden className="size-4 shrink-0 text-muted-foreground" />

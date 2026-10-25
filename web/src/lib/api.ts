@@ -74,6 +74,8 @@ export const installFirmware = (device: string, r: UpgradeRequest) =>
   request<{ release: string; from: string }>('POST', `/devices/${encodeURIComponent(device)}/firmware/upgrade`, r)
 /** Clear a finished install's result. */
 export const setDiagnostics = (on: boolean, minutes?: number) => request<{ on: boolean; until?: string }>('PUT', '/diagnostics', { on, minutes })
+/** A report on how Yagi and its tuners are doing now, as text to read, copy and send. */
+export const makeReport = () => request<{ at: string; text: string }>('POST', '/report')
 export const checkTuner = (device: string) => request<CheckReport>('POST', `/devices/${encodeURIComponent(device)}/check`)
 export const getDeviceInfo = (device: string, refresh = false) =>
   request<DeviceInfo>('GET', `/devices/${encodeURIComponent(device)}/info${refresh ? '?refresh=1' : ''}`)
