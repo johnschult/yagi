@@ -76,11 +76,19 @@ function DialogContent({
   const phone = useSheet()
   if (phone) {
     return (
-      <DrawerContent
-        // The class names say how a dialog sits in the middle of a page; the sheet keeps what it needs (a scrolling, gridded body).
-        className={cn("grid gap-4 overflow-y-auto p-4 pt-8 pb-[calc(1rem+env(safe-area-inset-bottom))] text-sm", className, "max-h-[92dvh] max-w-xl")}
-      >
-        {children}
+      <DrawerContent className="max-h-[92dvh] max-w-xl">
+        {/*
+          The body scrolls inside, not the sheet itself: when the sheet is the scroller, Vaul takes a swipe up at the top
+          for dragging the sheet and the rest of a tall dialog can't be reached. data-vaul-no-drag leaves the swipe to
+          the browser; the sheet is still closed from its handle, its Close button, the backdrop or Escape.
+          The class names say how a dialog sits in the middle of a page; the sheet keeps what it needs (a scrolling, gridded body).
+        */}
+        <div
+          data-vaul-no-drag
+          className={cn("grid min-h-0 flex-1 gap-4 overflow-y-auto overscroll-contain p-4 pt-8 pb-[calc(1rem+env(safe-area-inset-bottom))] text-sm", className, "max-h-full")}
+        >
+          {children}
+        </div>
         {showCloseButton && (
           <DrawerClose asChild>
             <Button variant="ghost" className="absolute top-2 right-2" size="icon-sm">
